@@ -11,7 +11,7 @@
 ```
 
 #### 第一题  加一（Easy）
-
+<!"https://leetcode-cn.com/problems/plus-one/">
 code 
 ```
 if (digits.size() == 0) return digits;
@@ -50,6 +50,7 @@ if (digits.size() == 0) return digits;
 ```
 
 #### 第二题 合并两个有序链表
+<!"https://leetcode-cn.com/problems/merge-two-sorted-lists/submissions/">
 code 
 ```
 class Solution {
@@ -83,7 +84,25 @@ public:
 <!"https://leetcode-cn.com/problems/subarray-sum-equals-k/submissions/">
 code 
 ```
-
+if (nums.size() == 0) return 0;
+        vector<int> rs = vector(nums.size()+1,0);
+        for (int i = 1; i < rs.size(); i++) {
+            rs[i] = rs[i - 1] + nums[i - 1];
+        }
+        unordered_map<int,int> map;
+        map[0] = 1;//初始差值为0的有一个
+        int ans = 0;
+        for(int i = 1; i < rs.size(); i++) {
+            if (map.find(rs[i] - k) != map.end()) { //查找差额的值，如果存在，那么就加值
+                ans += map[rs[i] - k];
+            }
+            if (map.find(rs[i]) != map.end()) { //如果不存在，那么存储，如果在个数+1
+                map[rs[i]]++;
+            } else {
+                map[rs[i]] = 1;
+            }
+        }
+        return ans;
 ```
 
 
