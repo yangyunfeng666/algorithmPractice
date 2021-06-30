@@ -1,114 +1,129 @@
-
-
-
-### 本周作业
+第四周题目
+```
+本周作业
 以下题目选 2 道提交即可
-```
-	•	加一（Easy）
-	•	合并两个有序链表（Easy）
-	•	设计循环双端队列（Medium）
-	•	和为 K 的子数组（Medium）
+	•	LRU 缓存机制（Medium）
+	•	子域名访问计数（Easy）
+	•	数组的度（Easy）
+	•	元素和为目标值的子矩阵数量（Hard）
+	•	合并K 个升序链表（Hard） (要求：用分治实现，不要用堆)
+
 ```
 
-#### 第一题  加一（Easy）
-<!"https://leetcode-cn.com/problems/plus-one/">
-code 
+#### 第一题LRU 缓存机制（Medium）
 ```
-if (digits.size() == 0) return digits;
-        int len = digits.size() - 1; 
-        while(len >= 0) { 
-            if ((digits[len] + 1) % 10 != 0) {
-                digits[len]++;
-                return digits;
-            } else {
-                digits[len] = 0;
-            }
-            len --;
+class LRUCache {
+public:
+
+    LRUCache(int capacity) {
+        this->capacity = capacity;
+        tail = new Node();
+        head = new Node();
+        head->next = tail;
+        tail->pre = head;
+    }
+    
+    int get(int key) {
+        if (map.find(key) == map.end()) return -1; //如果不存在，直接返回
+        int value = map[key]->val; 
+        deleteFromList(map[key]); //删除队列数据
+        insertIntoHead(key,value); //插入到对头
+        return value;
+    }
+    
+    void put(int key, int value) { 
+        if (map.find(key) != map.end()) { //当存在的时候，
+            deleteFromList(map[key]); //在链表中删除
+            insertIntoHead(key,value); //插入到队头
+        } else {
+            insertIntoHead(key,value); //直接插入到对头
         }
-        vector<int> a = vector(digits.size()+1,0);
-        a[0] = 1;
-        return a;
-```
-题解使用指针，最后一个下标
-```
-if (digits.size() == 0) return digits;
-        int len = digits.size() - 1;  //最后一个下标
-        while(len >= 0) { //从数组末端往前走
-            if ((digits[len] + 1) % 10 != 0) { //判断最后个值是否需要进位，如果不进，那么当前位++，然后返回。
-                digits[len]++;
-                return digits;
-            } else { //否则，当前位的值为0，
-                digits[len] = 0;
-            }
-            len --; //进入下一个位置
+        if (map.size() > capacity) { //大于容量的时候，去除tail的前一个值
+            map.erase(tail->pre->key);
+            deleteFromList(tail->pre);
         }
-        // 如果前面的所有位都是0，说明，需要再扩充进1位，赋值低位为1.
-        vector<int> a = vector(digits.size()+1,0);
-        a[0] = 1;
-        return a;
+    }
+
+    
+
+private:
+    struct Node { //定义数据结构
+        int val;
+        int key;
+        Node* pre;
+        Node* next;
+    };
+
+    unordered_map<int,Node*> map; //定义map，来快速查找节点
+    int capacity;
+    Node* head; // 保护节点头
+    Node* tail; // 保护节点尾
+
+    void deleteFromList(Node* node) {
+        node->pre->next = node->next;
+        node->next->pre = node->pre;
+        delete node;
+    };
+
+    void insertIntoHead(int key,int val) {
+        Node* node = new Node();
+        node->val = val;
+        node->key = key;
+			// 处理node和Head后节点的关系
+        node->next = head->next;
+        head->next->pre = node;
+			//处理head和node关系
+        node->pre = head;
+        head->next = node;
+        map[key] = node;
+    };
+};
 
 ```
 
-#### 第二题 合并两个有序链表
-<!"https://leetcode-cn.com/problems/merge-two-sorted-lists/submissions/">
-code 
+#### 合并K 个升序链表（Hard） (要求：用分治实现，不要用堆)
+
+Code
 ```
+
 class Solution {
 public:
-    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
-      if (l1 == nullptr) return l2; //判断当ll1 == null 的时候返回l2
-      if (l2 == nullptr) return l1; // 判断当前l2== null的时候返回l1
-      ListNode* head = new ListNode(-1); //定义一个新的空头链表
-      ListNode* pre = head;
-      while(l1 != nullptr && l2 != nullptr) { //当两个链表都有不能为空的时候，比较值，把值小的一个赋值到新的链表上，往后移动
-          if (l1->val < l2->val) {
-              pre->next = l1;
-              l1 = l1->next;
-          } else {
-              pre->next = l2;
-              l2 = l2->next;
-          }
-          pre = pre->next;
-      }
-      //最后当最后的谁还有值，就把他赋值给下一个节点上
-      pre->next = l1 == nullptr ? l2 : l1;
-      //返回空头节点的下一个节点的连接
-      return head->next;
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+      if (lists.size() == 0) return  NULL;
+      if (lists.size() == 1) return  lists[0];
+      if (lists.size() == 2) return  merge(lists[0],lists[1]);
+       int mid = lists.size() >> 1;
+        vector<ListNode*> l1;
+        for (int i = 0; i < mid; i++) {
+            l1.push_back(lists[i]);
+        }
+         vector<ListNode*> l2;
+        for (int i = mid; i < lists.size(); i++) {
+            l2.push_back(lists[i]);
+        }
+       return merge(mergeKLists(l1),mergeKLists(l2));
     }
+
+
+    ListNode* merge(ListNode* l1,ListNode* l2) {
+        if(l1 == NULL) return l2;
+        if (l2 == NULL) return l1; 
+        ListNode* list =  new ListNode(0); 
+        ListNode* pre = list;
+        while (l2 != NULL && l1 != NULL) {
+            if (l2->val > l1->val) {
+                pre->next = l1;
+                l1 = l1->next;
+            } else {
+                pre->next = l2;
+                l2 = l2->next;
+            }
+            pre = pre->next;
+        }
+        pre->next = l1 == NULL ? l2 : l1;
+        return list->next;
+    }
+
 };
 ```
-#### 第三题 •	设计循环双端队列（Medium）
-<!"https://leetcode-cn.com/problems/design-circular-deque/">
-code
-```
-
-```
-
-#### 第四题 和为 K 的子数组（Medium）
-
-<!"https://leetcode-cn.com/problems/subarray-sum-equals-k/submissions/">
-code 
-```
-if (nums.size() == 0) return 0;
-        vector<int> rs = vector(nums.size()+1,0);
-        for (int i = 1; i < rs.size(); i++) {
-            rs[i] = rs[i - 1] + nums[i - 1];
-        }
-        unordered_map<int,int> map;
-        map[0] = 1;//初始差值为0的有一个
-        int ans = 0;
-        for(int i = 1; i < rs.size(); i++) {
-            if (map.find(rs[i] - k) != map.end()) { //查找差额的值，如果存在，那么就加值
-                ans += map[rs[i] - k];
-            }
-            if (map.find(rs[i]) != map.end()) { //如果不存在，那么存储，如果在个数+1
-                map[rs[i]]++;
-            } else {
-                map[rs[i]] = 1;
-            }
-        }
-        return ans;
-```
-
-
 
