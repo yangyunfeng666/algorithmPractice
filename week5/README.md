@@ -64,4 +64,41 @@ public:
         return left;
     }
 };
-``` 
+```
+## 第三题 911. 在线选举
+
+CODE
+
+```
+class TopVotedCandidate {
+public:
+    TopVotedCandidate(vector<int>& persons, vector<int>& times) {
+        int n = persons.size();
+        vector<int> count(n,0); //统计某人的票数
+        int lead = 0;
+        for (int i =0; i < n; i++) {
+            count[persons[i]] ++; //统计票
+            if (count[persons[i]] >= count[lead]) {  //当票大于历史得票人后，更新得票人id
+                lead = persons[i];
+            }
+            map[times[i]] = lead; //记录当前时间的最多得票人的id
+        }
+    }
+    
+    int q(int t) {
+        auto iter = map.upper_bound(t); //返回非递减序列中第一个大于t的值的下标
+        auto val = prev(iter); //取出上一个时间的票
+        return val->second; 
+    }
+
+private:
+  map<int,int> map;    
+};
+
+/**
+ * Your TopVotedCandidate object will be instantiated and called as such:
+ * TopVotedCandidate* obj = new TopVotedCandidate(persons, times);
+ * int param_1 = obj->q(t);
+ */
+```
+ 
